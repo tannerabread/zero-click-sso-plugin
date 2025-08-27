@@ -1,4 +1,4 @@
-# **Plugin Name** Plugin
+# **Zero Click Sso** Plugin
 
 **Plugin Summary**
 
