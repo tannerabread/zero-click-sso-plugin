@@ -29,6 +29,8 @@ after_initialize do
       private
 
       def zero_click_log_every_request
+        return if SiteSetting.enable_local_logins
+
         Rails.logger.debug(
           "Zero Click SSO: request method=#{request.method} request path=#{request.path}",
         )
