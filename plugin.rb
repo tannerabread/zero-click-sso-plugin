@@ -21,6 +21,8 @@ after_initialize do
   Rails.logger.info("Zero Click SSO plugin initialized")
 
   module ::ZeroClickSso
+    Logger = ActiveSupport::Logger.new(Rails.root.join("log", "zero_click_sso.log"))
+
     module ControllerExtension
       def self.prepended(base)
         base.before_action :zero_click_log_every_request
@@ -29,11 +31,18 @@ after_initialize do
       private
 
       def zero_click_log_every_request
-        return if SiteSetting.enable_local_logins
-
-        Rails.logger.debug(
-          "Zero Click SSO: request method=#{request.method} request path=#{request.path}",
+        ZeroClickSso::Logger.warn(
+          "Zero Click SSO enabled=#{SiteSetting.zero_click_sso_enabled} " \
+            "local_logins=#{SiteSetting.enable_local_logins} " \
+            "path=#{request.path} format=#{request.format} xhr=#{request.xhr?}",
         )
+
+        return unless SiteSetting.zero_click_sso_enabled
+        return if SiteSetting.enable_local_logins
+        return unless request.format.html? && !request.xhr?
+        return if current_user.present?
+
+        ZeroClickSso::Logger.warn("Future home of SSO probe")
       end
     end
   end
