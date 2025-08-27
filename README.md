@@ -1,5 +1,5 @@
-# **Zero Click Sso** Plugin
+# Zero Click SSO Plugin
 
-**Plugin Summary**
+This plugin allows automatic login for users without requiring them to enter their credentials manually.
 
-For more information, please see: **url to meta topic**
+It works for configurations with `enable local logins` disabled and a single SSO configured.
