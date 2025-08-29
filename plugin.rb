@@ -42,7 +42,17 @@ after_initialize do
         return unless request.format.html? && !request.xhr?
         return if current_user.present?
 
-        ZeroClickSso::Logger.warn("Future home of SSO probe")
+        # prevent loop with omniauth endpoints
+        return if request.path.start_with?("/auth/")
+
+        auths = Discourse.enabled_authenticators
+        ZeroClickSso::Logger.warn("auths size = #{auths.size}")
+        return unless auths.size == 1
+
+        provider = auths.first.name
+
+        ZeroClickSso::Logger.warn("Current home of SSO probe, provider = #{provider}")
+        redirect_to "/auth/#{provider}?prompt=none&origin=#{CGI.escape(request.original_fullpath)}"
       end
     end
   end
