@@ -4,6 +4,7 @@ module ::ZeroClickSso
   module ControllerExtension
     def self.prepended(base)
       base.before_action :zero_click_login
+      base.before_action :cleanup_zero_click_session
     end
 
     private
@@ -14,6 +15,7 @@ module ::ZeroClickSso
 
       # Only first page load HTML requests
       return unless request.format.html? && !request.xhr?
+      return if request.path.end_with?(".webmanifest")
 
       # Detect if there is an active forum session
       return if current_user.present?
@@ -21,14 +23,26 @@ module ::ZeroClickSso
       # prevent loop with omniauth endpoints
       return if request.path.start_with?("/auth/")
 
+      return if session[:zero_click_attempted] || session[:zero_click_failed]
+
       auths = Discourse.enabled_authenticators
       return unless auths.size == 1
 
       provider = auths.first.name
       return if provider.blank?
 
+      session[:zero_click_attempted] = true
+      session[:zero_click_origin] = request.original_fullpath
+
       qs = Rack::Utils.build_query(prompt: "none", origin: request.original_fullpath)
-      redirect_to "/auth/#{provider}?#{qs}"
+      redirect_to path("/auth/#{provider}?#{qs}")
+    end
+
+    def cleanup_zero_click_session
+      if session[:zero_click_failed] && !request.path.start_with?("/auth/")
+        session.delete(:zero_click_attempted)
+        session.delete(:zero_click_failed)
+      end
     end
   end
 end

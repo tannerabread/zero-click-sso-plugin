@@ -16,11 +16,13 @@ end
 
 require_relative "lib/zero_click_sso/engine"
 require_relative "lib/zero_click_sso/controller_extension"
+require_relative "lib/zero_click_sso/failure_handler"
 
 after_initialize do
-  # Code which should run after Rails has finished booting
   Rails.logger.info("Zero Click SSO plugin initialized")
 
   require_dependency "application_controller"
   ::ApplicationController.prepend(::ZeroClickSso::ControllerExtension)
+
+  ::OmniAuth.config.on_failure = ::ZeroClickSso::FailureHandler
 end
