@@ -11,9 +11,3 @@ module ::ZeroClickSso
     end
   end
 end
-
-ZeroClickSso::Engine.routes.draw { get "/failure", to: "failure#index" }
-
-Discourse::Application.routes.append do
-  mount ::ZeroClickSso::Engine, at: "/auth", as: "zero_click_sso_plugin"
-end
