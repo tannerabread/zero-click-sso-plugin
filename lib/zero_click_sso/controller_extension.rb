@@ -10,7 +10,7 @@ module ::ZeroClickSso
 
     def zero_click_login
       return unless SiteSetting.zero_click_sso_enabled
-      return if SiteSetting.enable_local_logins
+      return if SiteSetting.enable_local_logins || SiteSetting.enable_local_logins_via_email
 
       # Only first page load HTML requests
       return unless request.format.html? && !request.xhr?
